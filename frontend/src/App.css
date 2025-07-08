@@ -1,0 +1,131 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #F4F7F9;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background-color: #2C3E50;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+}
+
+.main-content {
+  flex: 1;
+  text-align: center;
+  padding: 2rem;
+}
+
+h1 {
+  color: #2C3E50;
+  margin-bottom: 1rem;
+}
+
+button {
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.mode-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 24px;
+  margin-bottom: 1rem;
+}
+
+.analyze-btn {
+  background-color: #2C3E50;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 1rem;
+}
+
+.analyze-btn:hover,
+.mode-btn:hover {
+  opacity: 0.9;
+}
+
+.card {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: inline-block;
+  margin-top: 1rem;
+}
+
+.video-container, .upload-container {
+  margin-top: 1rem;
+}
+
+.webcam-preview, .video-preview {
+  border: 4px solid #FFD700; /* Yellow border */
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.loading {
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #FF9800;
+}
+
+.results {
+  text-align: left;
+  margin-top: 1.5rem;
+}
+
+.results ul {
+  list-style: none;
+  padding: 0;
+}
+
+.results li {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  background: #f9f9f9;
+}
+
+.results li.good {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+}
+
+.results li.bad {
+  background-color: #FFEBEE;
+  color: #C62828;
+}
+
+footer {
+  background-color: #2C3E50;
+  color: #ffffff;
+  text-align: center;
+  padding: 1rem;
+  font-size: 14px;
+  margin-top: auto;
+}
