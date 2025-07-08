@@ -3,74 +3,64 @@ import Webcam from 'react-webcam';
 import './App.css';
 
 function App() {
-  const [mode, setMode] = useState('webcam'); // 'webcam' or 'upload'
-  const [videoFile, setVideoFile] = useState(null);
+  const [mode, setMode] = useState('upload'); // 'upload' or 'snapshot'
+  const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState([]);
   const webcamRef = useRef(null);
 
   const handleFileChange = (e) => {
-    setVideoFile(e.target.files[0]);
+    setFile(e.target.files[0]);
+    setResults([]);
+  };
+
+  const handleCaptureSnapshot = () => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    if (!imageSrc) return;
+
+    // Convert base64 to Blob
+    const byteString = atob(imageSrc.split(',')[1]);
+    const mimeString = imageSrc.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeString });
+    const imageFile = new File([blob], 'snapshot.png', { type: mimeString });
+
+    setFile(imageFile);
     setResults([]);
   };
 
   const handleToggleMode = () => {
-    setMode((prev) => (prev === 'webcam' ? 'upload' : 'webcam'));
-    setVideoFile(null);
+    setMode((prev) => (prev === 'upload' ? 'snapshot' : 'upload'));
+    setFile(null);
     setResults([]);
   };
 
   const handleAnalyzePosture = async () => {
+    if (!file) {
+      alert("Please select a file or take a snapshot.");
+      return;
+    }
+
     setIsLoading(true);
     setResults([]);
 
     try {
       const formData = new FormData();
+      formData.append("file", file);
 
-      if (mode === 'upload' && videoFile) {
-        // Case: user uploads a video file
-        formData.append("file", videoFile);
-      } else if (mode === 'webcam' && webcamRef.current) {
-        // Case: capture webcam screenshot
-        const screenshot = webcamRef.current.getScreenshot();
-
-        if (!screenshot) {
-          alert("Unable to capture webcam image.");
-          setIsLoading(false);
-          return;
-        }
-
-        const blob = await fetch(screenshot).then(res => res.blob());
-        const file = new File([blob], "webcam.jpg", { type: "image/jpeg" });
-        formData.append("file", file);
-      } else {
-        alert("No input provided.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Send to FastAPI backend
       const response = await fetch("http://127.0.0.1:8000/upload/", {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
       const data = await response.json();
-
-      // Use actual analysis result if returned
-      if (data.results) {
-        setResults(data.results);
-      } else {
-        setResults([
-          { frame: 1, message: `Uploaded: ${data.filename}`, good: true }
-        ]);
-      }
+      setResults(data.results || [{ frame: 0, message: "No results", good: false }]);
     } catch (error) {
-      console.error("Error uploading or analyzing file:", error);
+      console.error("Error uploading or analyzing:", error);
       setResults([{ frame: 0, message: "Upload failed", good: false }]);
     } finally {
       setIsLoading(false);
@@ -88,33 +78,42 @@ function App() {
       <main className="main-content">
         <h1>Posture Detection App</h1>
         <button onClick={handleToggleMode} className="mode-btn">
-          Switch to {mode === 'webcam' ? 'Upload Mode' : 'Webcam Mode'}
+          Switch to {mode === 'upload' ? 'Snapshot Mode' : 'Upload Mode'}
         </button>
 
         <div className="card">
-          {mode === 'webcam' ? (
-            <div className="video-container">
-              <Webcam
-                ref={webcamRef}
-                width={640}
-                height={480}
-                className="webcam-preview"
-                videoConstraints={{ facingMode: 'user' }}
-              />
+          {mode === 'upload' ? (
+            <div className="upload-container">
+              <input type="file" accept="video/*,image/*" onChange={handleFileChange} />
+              {file && file.type.startsWith('video') && (
+                <video width="640" height="480" controls className="video-preview">
+                  <source src={URL.createObjectURL(file)} />
+                </video>
+              )}
+              {file && file.type.startsWith('image') && (
+                <img src={URL.createObjectURL(file)} alt="Snapshot" style={{ width: "100%", maxWidth: 640, marginTop: 10 }} />
+              )}
             </div>
           ) : (
-            <div className="upload-container">
-              <input type="file" accept="video/*" onChange={handleFileChange} />
-              {videoFile && (
-                <video width="640" height="480" controls className="video-preview">
-                  <source src={URL.createObjectURL(videoFile)} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+            <div className="snapshot-container">
+              <Webcam
+                ref={webcamRef}
+                audio={false}
+                screenshotFormat="image/png"
+                videoConstraints={{ facingMode: 'user' }}
+                mirrored
+                style={{ width: "100%", maxWidth: 640 }}
+              />
+              <button onClick={handleCaptureSnapshot} style={{ marginTop: "10px" }}>
+                Capture Snapshot
+              </button>
+              {file && (
+                <img src={URL.createObjectURL(file)} alt="Captured" style={{ width: "100%", maxWidth: 640, marginTop: 10 }} />
               )}
             </div>
           )}
 
-          <button onClick={handleAnalyzePosture} className="analyze-btn">
+          <button onClick={handleAnalyzePosture} className="analyze-btn" disabled={!file}>
             Analyze Posture
           </button>
 
