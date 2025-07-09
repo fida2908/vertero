@@ -96,7 +96,9 @@ function App() {
       formData.append("file", file);
       formData.append("posture_type", postureType); // 👈 Send posture type
 
-      const response = await fetch("http://127.0.0.1:8000/upload/", {
+      const baseUrl = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+      const response = await fetch(`${baseUrl}/upload/`, {
+
         method: "POST",
         body: formData,
       });
