@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: vertero-backend
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host=0.0.0.0 --port=10000
+    pythonVersion: 3.10.12
