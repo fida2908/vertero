@@ -30,9 +30,16 @@ header {
 }
 
 .logo {
-  width: 32px;
-  height: 32px;
-  margin-right: 10px;
+  height: 40px;
+  width: auto;
+  margin-right: 12px;
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  font-family: 'Satoshi', sans-serif;
 }
 
 .main-content {
@@ -99,6 +106,28 @@ button:active {
   box-shadow: 0 0 12px rgba(124, 28, 255, 0.5);
   transform: scale(1.03);
 }
+
+.tip-box {
+  background-color: #f0f4fa;
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  color: #1a1a1a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  max-width: 90%;
+  width: fit-content;
+  margin: 16px auto;
+}
+
+
+.tip-icon {
+  color: #3c6fc8;
+  margin-right: 8px;
+  font-size: 18px;
+}
+
 
 
 @keyframes pulse {

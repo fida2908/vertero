@@ -90,7 +90,7 @@ function App() {
     <div className="app-wrapper" data-theme="light">
       <header>
         <div className="brand">
-          <img src="/logo192.png" alt="logo" className="logo" /> Vertero
+          <img src="/verter_logo.png" alt="logo" className="logo" /> Vertero
         </div>
       </header>
 
@@ -157,8 +157,11 @@ function App() {
                 <h3>📝 Summary Insights</h3>
                 <ul>
                   {summary.map((s, idx) => (
-                    <li key={idx}>🕒 {s}</li>
+                  <li key={idx}>
+                    {s.startsWith("✅") ? <span className="good-posture">{s}</span> : `🕒 ${s}`}
+                   </li>
                   ))}
+
                 </ul>
               </div>
 
@@ -171,6 +174,10 @@ function App() {
           )}
         </div>
       </main>
+            <div className="tip-box">
+  <span className="tip-icon">ℹ️</span>
+  <strong>Tips:</strong> Make sure your full body is visible
+</div>
 
       <footer>
         <p>

@@ -107,9 +107,14 @@ def analyze_posture(video_path):
             })
 
     cap.release()
+
+    summary = summarize_results(results_list)
+    if not summary:
+        summary = ["✅ Your posture looks good!"]
+
     return {
         "results": results_list,
-        "summary": summarize_results(results_list)
+        "summary": summary
     }
 
 # 🖼️ Analyze posture from image
@@ -161,7 +166,11 @@ def analyze_image_posture(image_path):
     if not results:
         results.append({"frame": 0, "message": "✅ Good posture!", "good": True})
 
+    summary = summarize_results(results)
+    if not summary:
+        summary = ["✅ Your posture looks good!"]
+
     return {
         "results": results,
-        "summary": summarize_results(results)
+        "summary": summary
     }
