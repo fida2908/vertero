@@ -2,15 +2,15 @@ import cv2
 import numpy as np
 import mediapipe as mp
 
-# Common utility function
+# 📐 Calculate the angle between three points
 def calculate_angle(a, b, c):
-    """Calculate the angle between 3 points (in degrees)"""
     a, b, c = np.array(a), np.array(b), np.array(c)
     radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
     angle = np.abs(radians * 180.0 / np.pi)
     return angle if angle <= 180 else 360 - angle
 
-# ✅ Analyze videos (from cv2.VideoCapture)
+
+# 🎥 Analyze posture from video file
 def analyze_posture(video_path):
     mp_pose = mp.solutions.pose
     pose = mp_pose.Pose()
@@ -31,15 +31,16 @@ def analyze_posture(video_path):
         image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result = pose.process(image_rgb)
 
-        if result.pose_landmarks is None:
+        if not result.pose_landmarks:
             results_list.append({
                 "frame": frame_number,
-                "message": "No person detected",
+                "message": "⚠️ No person detected",
                 "good": False
             })
             continue
 
         lm = result.pose_landmarks.landmark
+
         def get_point(idx):
             pt = lm[idx]
             return [pt.x, pt.y]
@@ -50,6 +51,7 @@ def analyze_posture(video_path):
         ankle = get_point(mp_pose.PoseLandmark.LEFT_ANKLE.value)
         ear = get_point(mp_pose.PoseLandmark.LEFT_EAR.value)
 
+        # 📏 Angle calculations
         back_angle = calculate_angle(shoulder, hip, knee)
         neck_angle = calculate_angle(ear, shoulder, hip)
 
@@ -85,7 +87,7 @@ def analyze_posture(video_path):
     return results_list
 
 
-# ✅ Analyze images (jpg/png/screenshot)
+# 🖼️ Analyze posture from image file
 def analyze_image_posture(image_path):
     mp_pose = mp.solutions.pose
     pose = mp_pose.Pose(static_image_mode=True, model_complexity=2)
@@ -97,10 +99,11 @@ def analyze_image_posture(image_path):
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     result = pose.process(image_rgb)
 
-    if result.pose_landmarks is None:
+    if not result.pose_landmarks:
         return [{"frame": 0, "message": "⚠️ No person detected", "good": False}]
 
     lm = result.pose_landmarks.landmark
+
     def get_point(idx):
         pt = lm[idx]
         return [pt.x, pt.y]
@@ -111,16 +114,17 @@ def analyze_image_posture(image_path):
     ankle = get_point(mp_pose.PoseLandmark.LEFT_ANKLE.value)
     ear = get_point(mp_pose.PoseLandmark.LEFT_EAR.value)
 
+    back_angle = calculate_angle(shoulder, hip, knee)
+    neck_angle = calculate_angle(ear, shoulder, hip)
+
     issues = []
 
-    back_angle = calculate_angle(shoulder, hip, knee)
     if back_angle < 150:
         issues.append({"frame": 0, "message": f"Back angle too low: {int(back_angle)}°", "good": False})
 
     if knee[0] > ankle[0] + 0.02:
         issues.append({"frame": 0, "message": "Knee goes beyond toe", "good": False})
 
-    neck_angle = calculate_angle(ear, shoulder, hip)
     if neck_angle < 150:
         issues.append({"frame": 0, "message": f"Neck bent too much: {int(neck_angle)}°", "good": False})
 

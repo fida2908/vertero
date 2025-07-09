@@ -1,3 +1,4 @@
+/* ✅ Base Styles */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -34,7 +35,7 @@ header {
 .main-content {
   flex: 1;
   text-align: center;
-  padding: 2rem;
+  padding: 2rem 1rem;
 }
 
 h1 {
@@ -42,12 +43,23 @@ h1 {
   margin-bottom: 1rem;
 }
 
+/* ✅ Button Styling */
 button {
   cursor: pointer;
   font-size: 16px;
   border-radius: 8px;
   border: none;
   transition: all 0.3s ease;
+  max-width: 100%;
+}
+
+button:hover {
+  opacity: 0.95;
+  transform: scale(1.02);
+}
+
+button:active {
+  transform: scale(0.98);
 }
 
 .mode-btn {
@@ -64,11 +76,17 @@ button {
   margin-top: 1rem;
 }
 
-.analyze-btn:hover,
-.mode-btn:hover {
-  opacity: 0.9;
+.snapshot-btn {
+  background-color: #B01C21;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 12px;
+  font-weight: bold;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
+/* ✅ Main Card Box */
 .card {
   background: #ffffff;
   padding: 2rem;
@@ -76,24 +94,54 @@ button {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: inline-block;
   margin-top: 1rem;
+  width: 100%;
+  max-width: 700px;
 }
 
-.video-container, .upload-container {
+/* ✅ Containers */
+.video-container,
+.upload-container,
+.snapshot-container {
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.webcam-preview, .video-preview {
-  border: 4px solid #FFD700; /* Yellow border */
+.upload-container input[type="file"] {
+  margin-bottom: 1rem;
+}
+
+.webcam-preview,
+.video-preview {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  border: 4px solid #FFD700;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
 }
 
+/* ✅ Snapshot/Image preview */
+.snapshot-container img,
+.upload-container img {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  border: 4px solid #FFD700;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  margin-top: 1rem;
+}
+
+/* ✅ Loading State */
 .loading {
   margin-top: 1rem;
   font-weight: bold;
   color: #FF9800;
 }
 
+/* ✅ Result Section */
 .results {
   text-align: left;
   margin-top: 1.5rem;
@@ -121,6 +169,7 @@ button {
   color: #C62828;
 }
 
+/* ✅ Footer */
 footer {
   background-color: #2C3E50;
   color: #ffffff;
@@ -128,4 +177,47 @@ footer {
   padding: 1rem;
   font-size: 14px;
   margin-top: auto;
+}
+
+/* ---------------------------------- */
+/* ✅ Responsive Enhancements */
+/* ---------------------------------- */
+@media screen and (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+    width: 90%;
+  }
+
+  .mode-btn,
+  .analyze-btn,
+  .snapshot-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .brand {
+    font-size: 1.2rem;
+  }
+
+  .logo {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mode-btn,
+  .analyze-btn,
+  .snapshot-btn {
+    font-size: 14px;
+  }
 }

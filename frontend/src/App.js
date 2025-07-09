@@ -77,21 +77,24 @@ function App() {
 
       <main className="main-content">
         <h1>Posture Detection App</h1>
-        <button onClick={handleToggleMode} className="mode-btn">
-          Switch to {mode === 'upload' ? 'Snapshot Mode' : 'Upload Mode'}
-        </button>
 
         <div className="card">
+          {/* Toggle Mode Button */}
+          <button onClick={handleToggleMode} className="mode-btn">
+            Switch to {mode === 'upload' ? 'Snapshot Mode' : 'Upload Mode'}
+          </button>
+
+          {/* Upload or Snapshot section */}
           {mode === 'upload' ? (
             <div className="upload-container">
               <input type="file" accept="video/*,image/*" onChange={handleFileChange} />
               {file && file.type.startsWith('video') && (
-                <video width="640" height="480" controls className="video-preview">
+                <video controls className="media-preview">
                   <source src={URL.createObjectURL(file)} />
                 </video>
               )}
               {file && file.type.startsWith('image') && (
-                <img src={URL.createObjectURL(file)} alt="Snapshot" style={{ width: "100%", maxWidth: 640, marginTop: 10 }} />
+                <img src={URL.createObjectURL(file)} alt="Snapshot" className="media-preview" />
               )}
             </div>
           ) : (
@@ -102,23 +105,26 @@ function App() {
                 screenshotFormat="image/png"
                 videoConstraints={{ facingMode: 'user' }}
                 mirrored
-                style={{ width: "100%", maxWidth: 640 }}
+                className="media-preview"
               />
-              <button onClick={handleCaptureSnapshot} style={{ marginTop: "10px" }}>
-                Capture Snapshot
+              <button onClick={handleCaptureSnapshot} className="snapshot-btn">
+                📸 Capture Snapshot
               </button>
               {file && (
-                <img src={URL.createObjectURL(file)} alt="Captured" style={{ width: "100%", maxWidth: 640, marginTop: 10 }} />
+                <img src={URL.createObjectURL(file)} alt="Captured" className="media-preview" />
               )}
             </div>
           )}
 
+          {/* Analyze Button */}
           <button onClick={handleAnalyzePosture} className="analyze-btn" disabled={!file}>
             Analyze Posture
           </button>
 
+          {/* Loading Indicator */}
           {isLoading && <div className="loading">Analyzing posture...</div>}
 
+          {/* Results */}
           {results.length > 0 && (
             <div className="results">
               <h3>Posture Analysis Results</h3>
