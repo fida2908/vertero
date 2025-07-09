@@ -1,7 +1,8 @@
+numpy
+python-dotenv
+--extra-index-url https://pypi.org/simple
+mediapipe==0.10.3
+opencv-python
 fastapi
 uvicorn
 python-multipart
-opencv-python
-mediapipe
-numpy
-python-dotenv
