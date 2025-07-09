@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import shutil
 import os
 import subprocess
@@ -7,16 +8,23 @@ from analyze import analyze_posture, analyze_image_posture
 
 app = FastAPI()
 
-# ✅ Enable CORS for frontend
+# ✅ Enable CORS for frontend (React dev server)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React dev server
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 🎥 Convert .webm to .mp4 for OpenCV support
+# 📁 Ensure folders exist
+os.makedirs("videos", exist_ok=True)
+os.makedirs("annotated", exist_ok=True)
+
+# 🖼️ Serve annotated images as static files
+app.mount("/annotated", StaticFiles(directory="annotated"), name="annotated")
+
+# 🎥 WebM to MP4 (for OpenCV compatibility)
 def convert_webm_to_mp4(input_path, output_path):
     try:
         command = [
@@ -33,40 +41,39 @@ def convert_webm_to_mp4(input_path, output_path):
 @app.post("/upload/")
 async def upload_video(file: UploadFile = File(...)):
     try:
-        os.makedirs("videos", exist_ok=True)
         filename = file.filename
         ext = filename.lower().split('.')[-1]
-
-        # ✅ Supported file types
         valid_exts = ["mp4", "webm", "jpg", "jpeg", "png", "avi", "mov"]
         if ext not in valid_exts:
             raise ValueError(f"Unsupported file type: .{ext}")
 
-        # 🔽 Save the uploaded file
+        # 📝 Save uploaded file
         file_path = os.path.join("videos", filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         print(f"✅ File saved to: {file_path}")
 
-        # 🔁 Convert if webm
+        # 🔄 Convert webm
         if ext == "webm":
             mp4_path = file_path.replace(".webm", ".mp4")
             convert_webm_to_mp4(file_path, mp4_path)
             file_path = mp4_path
 
-        # 🔍 Analyze
+        # 🧠 Analyze posture
         if ext in ["jpg", "jpeg", "png"]:
             result = analyze_image_posture(file_path)
         else:
             result = analyze_posture(file_path)
 
-        print(f"✅ {filename}: {len(result['results'])} results, {len(result['summary'])} insights")
+        print(f"✅ Analyzed {filename}: {len(result['results'])} results, {len(result['summary'])} insights")
 
+        # 📦 Return results + annotated image path
         return {
             "filename": filename,
             "status": "Analyzed successfully",
             "results": result["results"],
-            "summary": result["summary"]
+            "summary": result["summary"],
+            "annotated_image": result.get("annotated_image")  # 🔗 Relative static URL
         }
 
     except Exception as e:
@@ -75,5 +82,6 @@ async def upload_video(file: UploadFile = File(...)):
             "filename": file.filename if file else "unknown",
             "status": "Failed to analyze",
             "results": [{"frame": 0, "message": str(e), "good": False}],
-            "summary": []
+            "summary": [],
+            "annotated_image": None
         }

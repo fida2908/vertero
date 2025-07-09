@@ -8,11 +8,13 @@ function App() {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState([]);
+  const [annotatedImageUrl, setAnnotatedImageUrl] = useState(null);
   const webcamRef = useRef(null);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setSummary([]);
+    setAnnotatedImageUrl(null);
   };
 
   const handleCaptureSnapshot = () => {
@@ -31,12 +33,14 @@ function App() {
 
     setFile(imageFile);
     setSummary([]);
+    setAnnotatedImageUrl(null);
   };
 
   const handleToggleMode = () => {
     setMode((prev) => (prev === 'upload' ? 'snapshot' : 'upload'));
     setFile(null);
     setSummary([]);
+    setAnnotatedImageUrl(null);
   };
 
   const handleAnalyzePosture = async () => {
@@ -47,6 +51,7 @@ function App() {
 
     setIsLoading(true);
     setSummary([]);
+    setAnnotatedImageUrl(null);
 
     try {
       const formData = new FormData();
@@ -59,6 +64,12 @@ function App() {
 
       const data = await response.json();
       setSummary(data.summary || []);
+
+      if (data.annotated_image) {
+        // ✅ Fixed path (no double /annotated/annotated/)
+        setAnnotatedImageUrl(`http://127.0.0.1:8000/${data.annotated_image}`);
+      }
+
     } catch (error) {
       console.error("Error analyzing:", error);
       setSummary(["❌ Upload or analysis failed."]);
@@ -105,12 +116,12 @@ function App() {
           {mode === 'upload' ? (
             <div className="upload-container">
               <input type="file" accept="video/*,image/*" onChange={handleFileChange} />
-              {file && file.type.startsWith('video') && (
+              {file && file.type?.startsWith('video') && (
                 <video width="100%" height="auto" controls className="video-preview">
                   <source src={URL.createObjectURL(file)} />
                 </video>
               )}
-              {file && file.type.startsWith('image') && (
+              {file && file.type?.startsWith('image') && (
                 <img
                   src={URL.createObjectURL(file)}
                   alt="Snapshot"
@@ -147,21 +158,32 @@ function App() {
           </button>
 
           {isLoading && (
-  <div className="loading">
-    Analyzing posture <span className="spinner" />
-  </div>
-)}
+            <div className="loading">
+              Analyzing posture <span className="spinner" />
+            </div>
+          )}
+
+          {annotatedImageUrl && (
+            <div style={{ marginTop: "20px", textAlign: "center" }}>
+              <h3>📌 Annotated Posture</h3>
+              <img
+                src={annotatedImageUrl}
+                alt="Annotated Result"
+                style={{ width: "100%", maxWidth: 640, borderRadius: 8, border: "2px solid #ccc" }}
+              />
+            </div>
+          )}
+
           {summary.length > 0 && (
             <>
               <div className="results summary">
                 <h3>📝 Summary Insights</h3>
                 <ul>
                   {summary.map((s, idx) => (
-                  <li key={idx}>
-                    {s.startsWith("✅") ? <span className="good-posture">{s}</span> : `🕒 ${s}`}
-                   </li>
+                    <li key={idx}>
+                      {s.startsWith("✅") ? <span className="good-posture">{s}</span> : `🕒 ${s}`}
+                    </li>
                   ))}
-
                 </ul>
               </div>
 
@@ -174,10 +196,11 @@ function App() {
           )}
         </div>
       </main>
-            <div className="tip-box">
-  <span className="tip-icon">ℹ️</span>
-  <strong>Tips:</strong> Make sure your full body is visible
-</div>
+
+      <div className="tip-box">
+        <span className="tip-icon">ℹ️</span>
+        <strong>Tips:</strong> Make sure your full body is visible
+      </div>
 
       <footer>
         <p>
