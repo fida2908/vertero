@@ -3,7 +3,7 @@ import cv2
 import mediapipe as mp
 import subprocess
 import numpy as np
-
+from collections import defaultdict
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -22,12 +22,51 @@ def is_knee_beyond_toe(knee, ankle):
     return knee[0] > ankle[0]
 
 
+from collections import defaultdict
+
+def group_seconds(seconds):
+    if not seconds:
+        return ""
+    
+    seconds = sorted(set(round(s, 1) for s in seconds))
+    ranges = []
+    start = seconds[0]
+    prev = seconds[0]
+
+    for curr in seconds[1:]:
+        if curr - prev > 1.5:
+            if start == prev:
+                ranges.append(f"{start:.1f}s")
+            else:
+                ranges.append(f"{start:.1f}s–{prev:.1f}s")
+            start = curr
+        prev = curr
+
+    if start == prev:
+        ranges.append(f"{start:.1f}s")
+    else:
+        ranges.append(f"{start:.1f}s–{prev:.1f}s")
+
+    return ', '.join(ranges)
+
+
 def summarize_results(results):
-    issues = [r['message'] for r in results if not r['good']]
-    if not issues:
+    issue_seconds = defaultdict(list)
+
+    for r in results:
+        if not r['good']:
+            issue_seconds[r['message']].append(r['second'])
+
+    if not issue_seconds:
         return ["✅ Great posture in all frames!"]
-    summary = list(set(issues))  # Unique issues
+
+    summary = []
+    for issue, secs in issue_seconds.items():
+        time_range = group_seconds(secs)
+        summary.append(f"{issue}: seen at {time_range}")
+
     return summary
+
 
 
 def reencode_for_browser(input_path, output_path):
