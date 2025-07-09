@@ -2,7 +2,7 @@
 
 numpy
 python-dotenv
-mediapipe==0.10.3
+mediapipe
 opencv-python
 fastapi
 uvicorn
