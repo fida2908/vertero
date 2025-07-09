@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: vertero-backend
+    name: vertero1-backend
     env: python
     rootDir: backend
     buildCommand: pip install -r ../requirements.txt
