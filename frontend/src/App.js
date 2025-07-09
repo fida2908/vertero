@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import Webcam from 'react-webcam';
+import jsPDF from 'jspdf';
 import './App.css';
 
 function App() {
@@ -66,6 +67,25 @@ function App() {
     }
   };
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("📋 Posture Detection Summary", 20, 20);
+
+    doc.setFontSize(12);
+    let y = 35;
+    summary.forEach((item, index) => {
+      doc.text(`• ${item}`, 20, y);
+      y += 10;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+
+    doc.save("posture_report.pdf");
+  };
+
   return (
     <div className="app-wrapper" data-theme="light">
       <header>
@@ -75,7 +95,7 @@ function App() {
       </header>
 
       <main className="main-content">
-        <h1>Posture Detection App</h1>
+        <h1>Your Daily Guide to Better Posture</h1>
 
         <div className="card">
           <button onClick={handleToggleMode} className="mode-btn">
@@ -126,18 +146,28 @@ function App() {
             Analyze Posture
           </button>
 
-          {isLoading && <div className="loading">Analyzing posture...</div>}
-
-          {/* Show summary only */}
+          {isLoading && (
+  <div className="loading">
+    Analyzing posture <span className="spinner" />
+  </div>
+)}
           {summary.length > 0 && (
-            <div className="results summary">
-              <h3>📝 Summary Insights</h3>
-              <ul>
-                {summary.map((s, idx) => (
-                  <li key={idx}>🕒 {s}</li>
-                ))}
-              </ul>
-            </div>
+            <>
+              <div className="results summary">
+                <h3>📝 Summary Insights</h3>
+                <ul>
+                  {summary.map((s, idx) => (
+                    <li key={idx}>🕒 {s}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="download-btn-wrapper">
+                <button className="download-btn" onClick={handleDownloadPDF}>
+                  ⬇️ Download Report (PDF)
+                </button>
+              </div>
+            </>
           )}
         </div>
       </main>

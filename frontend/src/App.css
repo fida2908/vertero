@@ -2,7 +2,8 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background-color: #F4F7F9;
+  background: linear-gradient(to bottom, #05071A, #0C1635);
+  color: #FFFFFF;
 }
 
 /* === APP LAYOUT === */
@@ -13,14 +14,15 @@ body {
 }
 
 header {
-  background-color: #502c2c;
+  background: linear-gradient(90deg, #0B0F24, #311B92, #512DA8, #1E3A8A, #0288D1);
   padding: 1rem 7rem;
+  height: 100px;
   display: flex;
   align-items: center;
 }
 
 .brand {
-  color: #ffffff;
+  color: #FFFFFF;
   font-size: 1.5rem;
   font-weight: bold;
   display: flex;
@@ -40,7 +42,8 @@ header {
 }
 
 h1 {
-  color: #2C3E50;
+  font-family: 'Satoshi', sans-serif;
+  color: #fbfbfc;
   margin-bottom: 1rem;
 }
 
@@ -48,7 +51,7 @@ h1 {
 .section-label {
   font-weight: 600;
   font-size: 16px;
-  color: #2C3E50;
+  color: #B0B2C3;
   margin-bottom: 10px;
 }
 
@@ -72,28 +75,40 @@ button:active {
 }
 
 .mode-btn {
-  background-color: #4CAF50;
+  background: linear-gradient(to right, #5D1FFB, #03C7FC);
   color: white;
+   border-radius: 8px;
   padding: 10px 24px;
   margin-bottom: 1rem;
 }
 
 .analyze-btn {
-  background-color: #2C3E50;
-  color: white;
-  padding: 10px 20px;
+  background-color: transparent;
+  color: #ffffff;
+  padding: 10px 24px;
   margin-top: 1rem;
-  animation: pulse 2s infinite;
+  border: 2px solid;
+  border-image: linear-gradient(90deg, #7C1CFF, #03C7FC) 1;
+  border-radius: 8px; /* FULLY CURVED */
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: 'Satoshi', sans-serif;
 }
 
+.analyze-btn:hover {
+  box-shadow: 0 0 12px rgba(124, 28, 255, 0.5);
+  transform: scale(1.03);
+}
+
+
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(44, 62, 80, 0.5); }
-  70% { box-shadow: 0 0 0 10px rgba(44, 62, 80, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(44, 62, 80, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(3, 199, 252, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(3, 199, 252, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(3, 199, 252, 0); }
 }
 
 .snapshot-btn {
-  background-color: #B01C21;
+  background-color: #4C58ED;
   color: white;
   padding: 10px 20px;
   margin-top: 12px;
@@ -104,14 +119,15 @@ button:active {
 
 /* === CARD === */
 .card {
-  background: #ffffff;
+  background: #0C1635;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(3, 199, 252, 0.2);
   display: inline-block;
   margin-top: 1rem;
   width: 100%;
   max-width: 700px;
+  color: #FFFFFF;
 }
 
 /* === CONTAINERS === */
@@ -126,17 +142,17 @@ button:active {
 
 .video-preview,
 .webcam-preview {
-  border: 4px solid #FFD700;
+  border: 4px solid #03C7FC;
   border-radius: 12px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 10px rgba(3, 199, 252, 0.6);
 }
 
 /* === IMAGE PREVIEW === */
 .snapshot-container img,
 .upload-container img {
-  border: 4px solid #FFD700;
+  border: 4px solid #03C7FC;
   border-radius: 12px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 10px rgba(3, 199, 252, 0.4);
   margin-top: 1rem;
   width: 100%;
   max-width: 640px;
@@ -146,7 +162,7 @@ button:active {
 .loading {
   margin-top: 1rem;
   font-weight: bold;
-  color: #FF9800;
+  color: #03C7FC;
 }
 
 /* === RESULTS === */
@@ -156,7 +172,7 @@ button:active {
 }
 
 .results h3 {
-  color: #2C3E50;
+  color: #9C5EFF;
   margin-bottom: 0.5rem;
 }
 
@@ -169,7 +185,8 @@ button:active {
   padding: 10px 14px;
   border-radius: 6px;
   margin-bottom: 8px;
-  background: #f9f9f9;
+  background: #1C2238;
+  color: #FFFFFF;
   font-size: 15px;
   line-height: 1.4;
   animation: fadeInUp 0.4s ease;
@@ -181,15 +198,15 @@ button:active {
 }
 
 .results li.good {
-  background-color: #E8F5E9;
-  color: #2E7D32;
-  border-left: 5px solid #66BB6A;
+  background-color: #0B2F1B;
+  color: #66BB6A;
+  border-left: 5px solid #4CAF50;
 }
 
 .results li.bad {
-  background-color: #FFEBEE;
-  color: #C62828;
-  border-left: 5px solid #EF5350;
+  background-color: #2F0B0B;
+  color: #EF5350;
+  border-left: 5px solid #C62828;
 }
 
 /* === SUMMARY STYLING === */
@@ -198,23 +215,62 @@ button:active {
 }
 
 .results.summary h3 {
-  color: #B01C21;
+  color: #FFD700;
 }
 
 .results.summary li {
-  background-color: #FFF3E0;
-  color: #E65100;
-  border-left: 5px solid #FF9800;
+  background-color: #1E2033;
+  color: #FF9800;
+  border-left: 5px solid #FFD700;
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* === FOOTER === */
+/*Download Button*/
+.download-btn-wrapper {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.download-btn {
+  background-color: #4C58ED;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.download-btn:hover {
+  background-color: #5D1FFB;
+}
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid #ccc;
+  border-top: 3px solid #03C7FC;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* FOOTER */
 footer {
-  background-color:#502c2c;
-  color: #ffffff;
+  background: linear-gradient(90deg, #0B0F24, #311B92, #4b25a3, #1E3A8A, #0288D1);;
+  color: #B0B2C3;
   text-align: center;
   padding: 1rem;
   font-size: 14px;
