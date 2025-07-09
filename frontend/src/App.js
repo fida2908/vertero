@@ -4,13 +4,16 @@ import jsPDF from 'jspdf';
 import './App.css';
 
 function App() {
-  const [mode, setMode] = useState('upload');
+  const [mode, setMode] = useState('upload'); // 'upload' | 'snapshot' | 'record'
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState([]);
   const [annotatedMediaUrl, setAnnotatedMediaUrl] = useState(null);
   const [isVideoResult, setIsVideoResult] = useState(false);
+  const [recording, setRecording] = useState(false);
   const webcamRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordedChunks = useRef([]);
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
@@ -39,15 +42,46 @@ function App() {
   };
 
   const handleToggleMode = () => {
-    setMode((prev) => (prev === 'upload' ? 'snapshot' : 'upload'));
+    const next = mode === 'upload' ? 'snapshot' : mode === 'snapshot' ? 'record' : 'upload';
+    setMode(next);
     setFile(null);
     setSummary([]);
     setAnnotatedMediaUrl(null);
   };
 
+  const startRecording = () => {
+    recordedChunks.current = [];
+    const stream = webcamRef.current.stream;
+    const options = { mimeType: 'video/webm; codecs=vp9' };
+    const mediaRecorder = new MediaRecorder(stream, options);
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunks.current.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks.current, { type: 'video/webm' });
+      const recordedFile = new File([blob], 'recorded_video.webm', { type: 'video/webm' });
+      setFile(recordedFile);
+      setSummary([]);
+      setAnnotatedMediaUrl(null);
+    };
+
+    mediaRecorderRef.current = mediaRecorder;
+    mediaRecorder.start();
+    setRecording(true);
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current.stop();
+    setRecording(false);
+  };
+
   const handleAnalyzePosture = async () => {
     if (!file) {
-      alert("Please select a file or take a snapshot.");
+      alert("Please select a file, take a snapshot, or record a video.");
       return;
     }
 
@@ -117,10 +151,10 @@ function App() {
 
         <div className="card">
           <button onClick={handleToggleMode} className="mode-btn">
-            Switch to {mode === 'upload' ? 'Snapshot Mode' : 'Upload Mode'}
+            Switch to {mode === 'upload' ? 'Snapshot Mode' : mode === 'snapshot' ? 'Record Mode' : 'Upload Mode'}
           </button>
 
-          {mode === 'upload' ? (
+          {mode === 'upload' && (
             <div className="upload-container">
               <input type="file" accept="video/*,image/*" onChange={handleFileChange} />
               {file && file.type?.startsWith('video') && (
@@ -136,7 +170,9 @@ function App() {
                 />
               )}
             </div>
-          ) : (
+          )}
+
+          {mode === 'snapshot' && (
             <div className="snapshot-container">
               <Webcam
                 ref={webcamRef}
@@ -156,6 +192,32 @@ function App() {
                   alt="Snapshot Preview"
                   style={{ width: "100%", maxWidth: 640, marginTop: 10 }}
                 />
+              )}
+            </div>
+          )}
+
+          {mode === 'record' && (
+            <div className="record-container">
+              <Webcam
+                ref={webcamRef}
+                audio={false}
+                mirrored
+                videoConstraints={{ facingMode: 'user' }}
+                style={{ width: "100%", maxWidth: 640 }}
+              />
+              {!recording ? (
+                <button onClick={startRecording} className="record-btn">
+                  🔴 Start Recording
+                </button>
+              ) : (
+                <button onClick={stopRecording} className="stop-btn">
+                  ⏹️ Stop Recording
+                </button>
+              )}
+              {file && (
+                <video controls style={{ width: "100%", maxWidth: 640, marginTop: 10 }}>
+                  <source src={URL.createObjectURL(file)} />
+                </video>
               )}
             </div>
           )}
