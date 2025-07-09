@@ -1,10 +1,11 @@
-/* ✅ Base Styles */
+/* === GLOBAL === */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
   background-color: #F4F7F9;
 }
 
+/* === APP LAYOUT === */
 .app-wrapper {
   display: flex;
   flex-direction: column;
@@ -12,8 +13,8 @@ body {
 }
 
 header {
-  background-color: #2C3E50;
-  padding: 1rem 2rem;
+  background-color: #502c2c;
+  padding: 1rem 7rem;
   display: flex;
   align-items: center;
 }
@@ -43,7 +44,15 @@ h1 {
   margin-bottom: 1rem;
 }
 
-/* ✅ Button Styling */
+/* === SECTION LABEL === */
+.section-label {
+  font-weight: 600;
+  font-size: 16px;
+  color: #2C3E50;
+  margin-bottom: 10px;
+}
+
+/* === BUTTONS === */
 button {
   cursor: pointer;
   font-size: 16px;
@@ -74,6 +83,13 @@ button:active {
   color: white;
   padding: 10px 20px;
   margin-top: 1rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(44, 62, 80, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(44, 62, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(44, 62, 80, 0); }
 }
 
 .snapshot-btn {
@@ -86,7 +102,7 @@ button:active {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* ✅ Main Card Box */
+/* === CARD === */
 .card {
   background: #ffffff;
   padding: 2rem;
@@ -98,7 +114,7 @@ button:active {
   max-width: 700px;
 }
 
-/* ✅ Containers */
+/* === CONTAINERS === */
 .video-container,
 .upload-container,
 .snapshot-container {
@@ -108,43 +124,40 @@ button:active {
   align-items: center;
 }
 
-.upload-container input[type="file"] {
-  margin-bottom: 1rem;
-}
-
-.webcam-preview,
-.video-preview {
-  width: 100%;
-  max-width: 640px;
-  height: auto;
+.video-preview,
+.webcam-preview {
   border: 4px solid #FFD700;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
 }
 
-/* ✅ Snapshot/Image preview */
+/* === IMAGE PREVIEW === */
 .snapshot-container img,
 .upload-container img {
-  width: 100%;
-  max-width: 640px;
-  height: auto;
   border: 4px solid #FFD700;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
   margin-top: 1rem;
+  width: 100%;
+  max-width: 640px;
 }
 
-/* ✅ Loading State */
+/* === LOADING === */
 .loading {
   margin-top: 1rem;
   font-weight: bold;
   color: #FF9800;
 }
 
-/* ✅ Result Section */
+/* === RESULTS === */
 .results {
   text-align: left;
   margin-top: 1.5rem;
+}
+
+.results h3 {
+  color: #2C3E50;
+  margin-bottom: 0.5rem;
 }
 
 .results ul {
@@ -153,25 +166,54 @@ button:active {
 }
 
 .results li {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   background: #f9f9f9;
+  font-size: 15px;
+  line-height: 1.4;
+  animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .results li.good {
   background-color: #E8F5E9;
   color: #2E7D32;
+  border-left: 5px solid #66BB6A;
 }
 
 .results li.bad {
   background-color: #FFEBEE;
   color: #C62828;
+  border-left: 5px solid #EF5350;
 }
 
-/* ✅ Footer */
+/* === SUMMARY STYLING === */
+.results.summary {
+  margin-top: 2rem;
+}
+
+.results.summary h3 {
+  color: #B01C21;
+}
+
+.results.summary li {
+  background-color: #FFF3E0;
+  color: #E65100;
+  border-left: 5px solid #FF9800;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* === FOOTER === */
 footer {
-  background-color: #2C3E50;
+  background-color:#502c2c;
   color: #ffffff;
   text-align: center;
   padding: 1rem;
@@ -179,45 +221,39 @@ footer {
   margin-top: auto;
 }
 
-/* ---------------------------------- */
-/* ✅ Responsive Enhancements */
-/* ---------------------------------- */
-@media screen and (max-width: 768px) {
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
   .main-content {
-    padding: 1rem;
+    padding: 1.5rem 1rem;
   }
 
   .card {
-    padding: 1rem;
-    width: 90%;
+    padding: 1.5rem 1rem;
+    margin: 1rem auto;
   }
 
   .mode-btn,
   .analyze-btn,
   .snapshot-btn {
     width: 100%;
-    padding: 12px;
-    font-size: 15px;
   }
 
   h1 {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 }
 
-@media screen and (max-width: 480px) {
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.2rem;
+  }
+
   .brand {
     font-size: 1.2rem;
   }
 
   .logo {
-    width: 24px;
-    height: 24px;
-  }
-
-  .mode-btn,
-  .analyze-btn,
-  .snapshot-btn {
-    font-size: 14px;
+    width: 28px;
+    height: 28px;
   }
 }

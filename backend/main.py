@@ -3,21 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
 import subprocess
-
-from analyze import analyze_posture, analyze_image_posture  # 🆕 Import new function
+from analyze import analyze_posture, analyze_image_posture
 
 app = FastAPI()
 
-# ✅ Allow frontend requests (CORS)
+# ✅ Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000"],  # React dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Optional: Convert .webm to .mp4 for OpenCV compatibility
+# 🎥 Convert .webm to .mp4 for OpenCV support
 def convert_webm_to_mp4(input_path, output_path):
     try:
         command = [
@@ -30,49 +29,51 @@ def convert_webm_to_mp4(input_path, output_path):
     except Exception as e:
         print("❌ FFmpeg conversion error:", e)
 
+# 📤 Upload endpoint
 @app.post("/upload/")
 async def upload_video(file: UploadFile = File(...)):
     try:
         os.makedirs("videos", exist_ok=True)
-        file_path = f"videos/{file.filename}"
+        filename = file.filename
+        ext = filename.lower().split('.')[-1]
 
-        # 🔽 Save uploaded file
+        # ✅ Supported file types
+        valid_exts = ["mp4", "webm", "jpg", "jpeg", "png", "avi", "mov"]
+        if ext not in valid_exts:
+            raise ValueError(f"Unsupported file type: .{ext}")
+
+        # 🔽 Save the uploaded file
+        file_path = os.path.join("videos", filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-
         print(f"✅ File saved to: {file_path}")
 
-        # ✅ Validate file extension
-        ext = file_path.lower()
-        if not ext.endswith((".mp4", ".webm", ".jpg", ".jpeg", ".png", ".avi", ".mov")):
-            raise ValueError("Unsupported file type")
-
-        # 🔁 Convert .webm to .mp4 for OpenCV
-        if ext.endswith(".webm"):
+        # 🔁 Convert if webm
+        if ext == "webm":
             mp4_path = file_path.replace(".webm", ".mp4")
             convert_webm_to_mp4(file_path, mp4_path)
             file_path = mp4_path
 
-        # 🧠 Run the correct analysis function
-        if ext.endswith((".jpg", ".jpeg", ".png")):
-            results = analyze_image_posture(file_path)  # 🆕 Analyze image
+        # 🔍 Analyze
+        if ext in ["jpg", "jpeg", "png"]:
+            result = analyze_image_posture(file_path)
         else:
-            results = analyze_posture(file_path)  # ✅ Analyze video
+            result = analyze_posture(file_path)
 
-        print(f"✅ Analysis results: {results}")
+        print(f"✅ {filename}: {len(result['results'])} results, {len(result['summary'])} insights")
 
         return {
-            "filename": file.filename,
+            "filename": filename,
             "status": "Analyzed successfully",
-            "results": results
+            "results": result["results"],
+            "summary": result["summary"]
         }
 
     except Exception as e:
-        print("❌ Error in /upload/:", e)
+        print("❌ Error during upload or analysis:", e)
         return {
             "filename": file.filename if file else "unknown",
             "status": "Failed to analyze",
-            "results": [
-                {"frame": 0, "message": str(e) or "Upload failed", "good": False}
-            ]
+            "results": [{"frame": 0, "message": str(e), "good": False}],
+            "summary": []
         }
