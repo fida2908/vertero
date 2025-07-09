@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import shutil
@@ -6,13 +6,9 @@ import os
 import subprocess
 from analyze import analyze_posture, analyze_image_posture
 
-
-
-
-
 app = FastAPI()
 
-# ✅ CORS: Allow React frontend (adjust origin if needed)
+# ✅ CORS settings for React frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -21,14 +17,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 📁 Create required folders
+# 📁 Required folders
 os.makedirs("videos", exist_ok=True)
 os.makedirs("annotated", exist_ok=True)
 
 # 🖼️ Serve annotated media
 app.mount("/annotated", StaticFiles(directory="annotated"), name="annotated")
 
-# 🔄 Convert webm to mp4 using FFmpeg
+# 🔄 Convert webm to mp4
 def convert_webm_to_mp4(input_path, output_path):
     try:
         command = [
@@ -43,7 +39,10 @@ def convert_webm_to_mp4(input_path, output_path):
 
 # 📤 Upload and Analyze Endpoint
 @app.post("/upload/")
-async def upload_and_analyze(file: UploadFile = File(...)):
+async def upload_and_analyze(
+    file: UploadFile = File(...),
+    posture_type: str = Form("squat")  # Default to squat if not provided
+):
     try:
         filename = file.filename
         ext = filename.lower().split('.')[-1]
@@ -51,23 +50,23 @@ async def upload_and_analyze(file: UploadFile = File(...)):
         if ext not in allowed_exts:
             raise ValueError(f"Unsupported file type: .{ext}")
 
-        # 📥 Save file to disk
+        # 📥 Save uploaded file
         input_path = os.path.join("videos", filename)
         with open(input_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         print(f"✅ File saved: {input_path}")
 
-        # 🔄 Convert if .webm
+        # 🔄 Convert webm to mp4
         if ext == "webm":
             converted_path = input_path.replace(".webm", ".mp4")
             convert_webm_to_mp4(input_path, converted_path)
             input_path = converted_path
 
-        # 🔍 Analyze posture
+        # 🔍 Run analysis
         if ext in ["jpg", "jpeg", "png"]:
-            result = analyze_image_posture(input_path)
+            result = analyze_image_posture(input_path, posture_type)
         else:
-            result = analyze_posture(input_path)
+            result = analyze_posture(input_path, posture_type)
 
         print(f"📊 Analysis complete: {len(result['results'])} results")
 

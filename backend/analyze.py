@@ -4,6 +4,7 @@ import mediapipe as mp
 import subprocess
 import numpy as np
 from collections import defaultdict
+
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -22,12 +23,10 @@ def is_knee_beyond_toe(knee, ankle):
     return knee[0] > ankle[0]
 
 
-from collections import defaultdict
-
 def group_seconds(seconds):
     if not seconds:
         return ""
-    
+
     seconds = sorted(set(round(s, 1) for s in seconds))
     ranges = []
     start = seconds[0]
@@ -68,7 +67,6 @@ def summarize_results(results):
     return summary
 
 
-
 def reencode_for_browser(input_path, output_path):
     try:
         command = [
@@ -83,7 +81,7 @@ def reencode_for_browser(input_path, output_path):
         print("❌ FFmpeg re-encoding failed:", e)
 
 
-def analyze_posture(video_path):
+def analyze_posture(video_path, posture_type="squat"):
     pose = mp_pose.Pose()
     cap = cv2.VideoCapture(video_path)
 
@@ -130,6 +128,7 @@ def analyze_posture(video_path):
         lm = result.pose_landmarks.landmark
         def get_point(idx): return [lm[idx].x, lm[idx].y]
 
+        # Key points
         shoulder = get_point(mp_pose.PoseLandmark.LEFT_SHOULDER.value)
         hip = get_point(mp_pose.PoseLandmark.LEFT_HIP.value)
         knee_left = get_point(mp_pose.PoseLandmark.LEFT_KNEE.value)
@@ -142,14 +141,17 @@ def analyze_posture(video_path):
         neck_angle = calculate_angle(ear, shoulder, hip)
 
         issues = []
-        if back_angle < 150:
-            issues.append(f"Back angle too low: {int(back_angle)}°")
-        if is_knee_beyond_toe(knee_left, ankle_left) or is_knee_beyond_toe(knee_right, ankle_right):
-            issues.append("Knee goes beyond toe")
-        if neck_angle < 150:
-            issues.append(f"Neck bent too much: {int(neck_angle)}°")
-        if back_angle < 165:
-            issues.append(f"Back not straight: {int(back_angle)}°")
+
+        if posture_type == "squat":
+            if back_angle < 150:
+                issues.append(f"Back angle too low: {int(back_angle)}°")
+            if is_knee_beyond_toe(knee_left, ankle_left) or is_knee_beyond_toe(knee_right, ankle_right):
+                issues.append("Knee goes beyond toe")
+        elif posture_type == "desk":
+            if neck_angle < 150:
+                issues.append(f"Neck bent too much: {int(neck_angle)}°")
+            if back_angle < 165:
+                issues.append(f"Back not straight: {int(back_angle)}°")
 
         if not issues:
             results_list.append({
@@ -201,7 +203,7 @@ def analyze_posture(video_path):
     }
 
 
-def analyze_image_posture(image_path):
+def analyze_image_posture(image_path, posture_type="squat"):
     pose = mp_pose.Pose(static_image_mode=True, model_complexity=2)
     image = cv2.imread(image_path)
 
@@ -237,14 +239,17 @@ def analyze_image_posture(image_path):
     neck_angle = calculate_angle(ear, shoulder, hip)
 
     results = []
-    if back_angle < 150:
-        results.append({"frame": 0, "message": f"Back angle too low: {int(back_angle)}°", "good": False})
-    if is_knee_beyond_toe(knee_left, ankle_left) or is_knee_beyond_toe(knee_right, ankle_right):
-        results.append({"frame": 0, "message": "Knee goes beyond toe", "good": False})
-    if neck_angle < 150:
-        results.append({"frame": 0, "message": f"Neck bent too much: {int(neck_angle)}°", "good": False})
-    if back_angle < 165:
-        results.append({"frame": 0, "message": f"Back not straight: {int(back_angle)}°", "good": False})
+
+    if posture_type == "squat":
+        if back_angle < 150:
+            results.append({"frame": 0, "message": f"Back angle too low: {int(back_angle)}°", "good": False})
+        if is_knee_beyond_toe(knee_left, ankle_left) or is_knee_beyond_toe(knee_right, ankle_right):
+            results.append({"frame": 0, "message": "Knee goes beyond toe", "good": False})
+    elif posture_type == "desk":
+        if neck_angle < 150:
+            results.append({"frame": 0, "message": f"Neck bent too much: {int(neck_angle)}°", "good": False})
+        if back_angle < 165:
+            results.append({"frame": 0, "message": f"Back not straight: {int(back_angle)}°", "good": False})
 
     if not results:
         results.append({"frame": 0, "message": "✅ Good posture!", "good": True})

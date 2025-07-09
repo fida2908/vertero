@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 python-multipart
-mediapipe
 opencv-python
+mediapipe
 numpy
+python-dotenv

@@ -5,6 +5,7 @@ import './App.css';
 
 function App() {
   const [mode, setMode] = useState('upload'); // 'upload' | 'snapshot' | 'record'
+  const [postureType, setPostureType] = useState('squat'); // squat | desk
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState([]);
@@ -93,6 +94,7 @@ function App() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("posture_type", postureType); // 👈 Send posture type
 
       const response = await fetch("http://127.0.0.1:8000/upload/", {
         method: "POST",
@@ -154,6 +156,16 @@ function App() {
             Switch to {mode === 'upload' ? 'Snapshot Mode' : mode === 'snapshot' ? 'Record Mode' : 'Upload Mode'}
           </button>
 
+          {/* 🧠 Posture Type Selection */}
+          <div style={{ marginTop: "1rem" }}>
+            <label style={{ marginRight: 8, color: "#ccc" }}>Posture Type:</label>
+            <select value={postureType} onChange={(e) => setPostureType(e.target.value)}>
+              <option value="squat">🏋️ Squat</option>
+              <option value="desk">💻 Desk Sitting</option>
+            </select>
+          </div>
+
+          {/* === Upload Mode === */}
           {mode === 'upload' && (
             <div className="upload-container">
               <input type="file" accept="video/*,image/*" onChange={handleFileChange} />
@@ -172,6 +184,7 @@ function App() {
             </div>
           )}
 
+          {/* === Snapshot Mode === */}
           {mode === 'snapshot' && (
             <div className="snapshot-container">
               <Webcam
@@ -196,6 +209,7 @@ function App() {
             </div>
           )}
 
+          {/* === Record Mode === */}
           {mode === 'record' && (
             <div className="record-container">
               <Webcam
