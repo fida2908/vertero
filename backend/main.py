@@ -6,9 +6,13 @@ import os
 import subprocess
 from analyze import analyze_posture, analyze_image_posture
 
+
+
+
+
 app = FastAPI()
 
-# ✅ Enable CORS for frontend (React dev server)
+# ✅ CORS: Allow React frontend (adjust origin if needed)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -17,14 +21,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 📁 Ensure folders exist
+# 📁 Create required folders
 os.makedirs("videos", exist_ok=True)
 os.makedirs("annotated", exist_ok=True)
 
-# 🖼️ Serve annotated images as static files
+# 🖼️ Serve annotated media
 app.mount("/annotated", StaticFiles(directory="annotated"), name="annotated")
 
-# 🎥 WebM to MP4 (for OpenCV compatibility)
+# 🔄 Convert webm to mp4 using FFmpeg
 def convert_webm_to_mp4(input_path, output_path):
     try:
         command = [
@@ -32,56 +36,57 @@ def convert_webm_to_mp4(input_path, output_path):
             "-c:v", "libx264", "-crf", "23", "-preset", "veryfast",
             output_path
         ]
-        subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(f"🎥 Converted {input_path} to {output_path}")
-    except Exception as e:
-        print("❌ FFmpeg conversion error:", e)
+        subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        print(f"🎥 Converted: {input_path} ➝ {output_path}")
+    except subprocess.CalledProcessError as e:
+        print("❌ FFmpeg conversion failed:", e)
 
-# 📤 Upload endpoint
+# 📤 Upload and Analyze Endpoint
 @app.post("/upload/")
-async def upload_video(file: UploadFile = File(...)):
+async def upload_and_analyze(file: UploadFile = File(...)):
     try:
         filename = file.filename
         ext = filename.lower().split('.')[-1]
-        valid_exts = ["mp4", "webm", "jpg", "jpeg", "png", "avi", "mov"]
-        if ext not in valid_exts:
+        allowed_exts = ["mp4", "webm", "jpg", "jpeg", "png", "avi", "mov"]
+        if ext not in allowed_exts:
             raise ValueError(f"Unsupported file type: .{ext}")
 
-        # 📝 Save uploaded file
-        file_path = os.path.join("videos", filename)
-        with open(file_path, "wb") as buffer:
+        # 📥 Save file to disk
+        input_path = os.path.join("videos", filename)
+        with open(input_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        print(f"✅ File saved to: {file_path}")
+        print(f"✅ File saved: {input_path}")
 
-        # 🔄 Convert webm
+        # 🔄 Convert if .webm
         if ext == "webm":
-            mp4_path = file_path.replace(".webm", ".mp4")
-            convert_webm_to_mp4(file_path, mp4_path)
-            file_path = mp4_path
+            converted_path = input_path.replace(".webm", ".mp4")
+            convert_webm_to_mp4(input_path, converted_path)
+            input_path = converted_path
 
-        # 🧠 Analyze posture
+        # 🔍 Analyze posture
         if ext in ["jpg", "jpeg", "png"]:
-            result = analyze_image_posture(file_path)
+            result = analyze_image_posture(input_path)
         else:
-            result = analyze_posture(file_path)
+            result = analyze_posture(input_path)
 
-        print(f"✅ Analyzed {filename}: {len(result['results'])} results, {len(result['summary'])} insights")
+        print(f"📊 Analysis complete: {len(result['results'])} results")
 
-        # 📦 Return results + annotated image path
         return {
             "filename": filename,
             "status": "Analyzed successfully",
-            "results": result["results"],
-            "summary": result["summary"],
-            "annotated_image": result.get("annotated_image")  # 🔗 Relative static URL
+            "results": result.get("results", []),
+            "summary": result.get("summary", []),
+            "annotated_image": result.get("annotated_image"),
+            "annotated_video": result.get("annotated_video")
         }
 
     except Exception as e:
-        print("❌ Error during upload or analysis:", e)
+        print("❌ Analysis failed:", str(e))
         return {
             "filename": file.filename if file else "unknown",
             "status": "Failed to analyze",
             "results": [{"frame": 0, "message": str(e), "good": False}],
             "summary": [],
-            "annotated_image": None
+            "annotated_image": None,
+            "annotated_video": None
         }

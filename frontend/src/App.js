@@ -8,13 +8,15 @@ function App() {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState([]);
-  const [annotatedImageUrl, setAnnotatedImageUrl] = useState(null);
+  const [annotatedMediaUrl, setAnnotatedMediaUrl] = useState(null);
+  const [isVideoResult, setIsVideoResult] = useState(false);
   const webcamRef = useRef(null);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selected = e.target.files[0];
+    setFile(selected);
     setSummary([]);
-    setAnnotatedImageUrl(null);
+    setAnnotatedMediaUrl(null);
   };
 
   const handleCaptureSnapshot = () => {
@@ -33,14 +35,14 @@ function App() {
 
     setFile(imageFile);
     setSummary([]);
-    setAnnotatedImageUrl(null);
+    setAnnotatedMediaUrl(null);
   };
 
   const handleToggleMode = () => {
     setMode((prev) => (prev === 'upload' ? 'snapshot' : 'upload'));
     setFile(null);
     setSummary([]);
-    setAnnotatedImageUrl(null);
+    setAnnotatedMediaUrl(null);
   };
 
   const handleAnalyzePosture = async () => {
@@ -51,7 +53,8 @@ function App() {
 
     setIsLoading(true);
     setSummary([]);
-    setAnnotatedImageUrl(null);
+    setAnnotatedMediaUrl(null);
+    setIsVideoResult(false);
 
     try {
       const formData = new FormData();
@@ -66,12 +69,16 @@ function App() {
       setSummary(data.summary || []);
 
       if (data.annotated_image) {
-        // ✅ Fixed path (no double /annotated/annotated/)
-        setAnnotatedImageUrl(`http://127.0.0.1:8000/${data.annotated_image}`);
+        setAnnotatedMediaUrl(`http://127.0.0.1:8000/${data.annotated_image}`);
+        setIsVideoResult(false);
+      } else if (data.annotated_video) {
+        setAnnotatedMediaUrl(`http://127.0.0.1:8000/${data.annotated_video}`);
+        setIsVideoResult(true);
+      } else {
+        setAnnotatedMediaUrl(null);
       }
-
     } catch (error) {
-      console.error("Error analyzing:", error);
+      console.error("❌ Error analyzing:", error);
       setSummary(["❌ Upload or analysis failed."]);
     } finally {
       setIsLoading(false);
@@ -85,7 +92,7 @@ function App() {
 
     doc.setFontSize(12);
     let y = 35;
-    summary.forEach((item, index) => {
+    summary.forEach((item) => {
       doc.text(`• ${item}`, 20, y);
       y += 10;
       if (y > 270) {
@@ -101,7 +108,7 @@ function App() {
     <div className="app-wrapper" data-theme="light">
       <header>
         <div className="brand">
-          <img src="/verter_logo.png" alt="logo" className="logo" /> Vertero
+          <img src="/verter_logo.png" alt="Vertero Logo" className="logo" /> Vertero
         </div>
       </header>
 
@@ -124,7 +131,7 @@ function App() {
               {file && file.type?.startsWith('image') && (
                 <img
                   src={URL.createObjectURL(file)}
-                  alt="Snapshot"
+                  alt="Uploaded Preview"
                   style={{ width: "100%", maxWidth: 640, marginTop: 10 }}
                 />
               )}
@@ -146,7 +153,7 @@ function App() {
               {file && (
                 <img
                   src={URL.createObjectURL(file)}
-                  alt="Captured"
+                  alt="Snapshot Preview"
                   style={{ width: "100%", maxWidth: 640, marginTop: 10 }}
                 />
               )}
@@ -163,14 +170,22 @@ function App() {
             </div>
           )}
 
-          {annotatedImageUrl && (
+          {annotatedMediaUrl && (
             <div style={{ marginTop: "20px", textAlign: "center" }}>
               <h3>📌 Annotated Posture</h3>
-              <img
-                src={annotatedImageUrl}
-                alt="Annotated Result"
-                style={{ width: "100%", maxWidth: 640, borderRadius: 8, border: "2px solid #ccc" }}
-              />
+              {isVideoResult ? (
+                <video
+                  src={annotatedMediaUrl}
+                  controls
+                  style={{ width: "100%", maxWidth: 640, borderRadius: 8, border: "2px solid #ccc" }}
+                />
+              ) : (
+                <img
+                  src={annotatedMediaUrl}
+                  alt="Annotated Posture Result"
+                  style={{ width: "100%", maxWidth: 640, borderRadius: 8, border: "2px solid #ccc" }}
+                />
+              )}
             </div>
           )}
 
@@ -181,7 +196,11 @@ function App() {
                 <ul>
                   {summary.map((s, idx) => (
                     <li key={idx}>
-                      {s.startsWith("✅") ? <span className="good-posture">{s}</span> : `🕒 ${s}`}
+                      {s.startsWith("✅") ? (
+                        <span className="good-posture">{s}</span>
+                      ) : (
+                        `🕒 ${s}`
+                      )}
                     </li>
                   ))}
                 </ul>
