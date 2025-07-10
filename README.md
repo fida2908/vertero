@@ -84,6 +84,12 @@ React app will run at http://localhost:3000
 
 <img width="6" height="21" alt="Screenshot 2025-07-10 190655" src="https://github.com/user-attachments/assets/73573956-f59c-4c99-9a84-a1d2ddd97234" />
 
+
+---
+### Demo Video
+
+https://github.com/fida2908/vertero/assets/demo.mp4
+
 ---
 ### 📁 Folder Structure
 📁 backend/
