@@ -36,3 +36,70 @@
 ```bash
 git clone https://github.com/fida2908/vertero.git
 cd vertero
+```
+---
+### Backend (FastAPI + Python)
+Inside /backend folder:
+```bash
+cd backend
+pip install -r requirements.txt
+```
+Start server:
+```bash
+uvicorn main:app --reload
+```
+
+Server will run at: http://127.0.0.1:8000
+
+---
+### 🌐 Frontend (React)
+Inside /frontend folder:
+
+```bash
+cd frontend
+npm install
+```
+
+Create .env file:
+REACT_APP_API_URL=http://127.0.0.1:8000
+
+
+Start frontend
+```bash
+npm start
+```
+
+React app will run at http://localhost:3000
+
+---
+### 📸 Screenshots
+
+<img width="967" height="978" alt="Screenshot 2025-07-10 190715" src="https://github.com/user-attachments/assets/7f3ce371-1ae3-4e9b-93e4-94cbba455ce8" />
+
+
+<img width="1869" height="895" alt="Screenshot 2025-07-10 190830" src="https://github.com/user-attachments/assets/d7cfdc93-e40b-4e83-94ad-59f82cbef7be" />
+
+
+<img width="942" height="804" alt="Screenshot 2025-07-10 190737" src="https://github.com/user-attachments/assets/c4a365dc-3cf9-46aa-bec6-b9899055ad03" />
+
+<img width="6" height="21" alt="Screenshot 2025-07-10 190655" src="https://github.com/user-attachments/assets/73573956-f59c-4c99-9a84-a1d2ddd97234" />
+
+---
+### 📁 Folder Structure
+📁 backend/
+   ├── main.py
+   ├── analyze.py
+   ├── annotated/         # Annotated outputs
+   └── videos/         # Uploaded input videos
+
+📁 frontend/
+   ├── src/
+   │   ├── App.js
+   │   ├── App.css
+   │   └── assets/
+   └── public/
+
+---
+### 🙌 Team / Credits
+Developed by:
+Fida K A
