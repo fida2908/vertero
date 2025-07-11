@@ -8,10 +8,15 @@ from analyze import analyze_posture, analyze_image_posture
 
 app = FastAPI()
 
-# ✅ CORS settings for React frontend
+# CORS settings for React frontend
+origins = [
+    "http://localhost:3000",  # For development
+    "https://vertero.vercel.app"  # Your deployed React app
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
